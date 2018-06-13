@@ -3,8 +3,8 @@
 import ROOT
 from ROOT import TFile, TTree, TEventList
 
-indir = "/scratch/jmyers10/dihiggs/WHad_studies_v2/Boosted_WHad_4_wnut/"
-
+indir = "/scratch/jmyers10/dihiggs/WHad_studies_v2/Boosted_WHad_2/"
+outdir = "/scratch/jmyers10/dihiggs/WHad_studies_v2/Boosted_WHad_2/"
 signalsamples = [
         ("342053","SM","125"),
         ("343764","Xhh260","260"),
@@ -33,26 +33,29 @@ signalsamples = [
 
 
 
-def makeList():
+def makeList(sample):
 	f1 = TFile.Open(indir+"signal.root")
 	t1 = f1.Get("Nominal")
-	t1.Draw(">>elist","mchannelnumber == 343780") 
+	t1.Draw(">>elist","mchannelnumber == "+sample) 
 	elist = TEventList() 
 	elist = ROOT.gDirectory.Get("elist")
-	ef = TFile("elist.root","recreate")
+	ef = TFile(outdir+"elist.root","recreate")
 	elist.Write()
 	return True
-def makeSmall():
+def makeSmall(filename):
 	f = TFile.Open(indir+"elist.root")
 	elist = f.Get("elist")
 	f1 = TFile.Open(indir+"signal.root")
 	Nominal = f1.Get("Nominal")
 	Nominal.SetEventList(elist)
-	f2 = TFile("small.root","recreate")
+	f2 = TFile(outdir+"MVATree_"+filename+".root","recreate")
 	small = Nominal.CopyTree("")
 	small.Write()
-	small.Print()
+	#small.Print()
 	return True
-
-makeList()
-makeSmall()
+for masspoint in signalsamples:
+	sample = masspoint[0]
+	filename = masspoint[1]
+	print filename
+	makeList(sample)
+	makeSmall(filename)
